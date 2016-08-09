@@ -13,3 +13,13 @@ make yes-molecule
 make yes-user-meso
 make meso ARCH=[sm_30|sm_35|sm_52|sm_60|...]
 ```
+To run a simple example of DPD fluid
+```
+cd <working_copy>/example/simple
+../../src/lmp_meso -in [sp.run|dp.run] -var case [25|48|64]
+```
+```
+sp.run: single-precision
+dp.run: double-precison
+case: simulation box size (number density = 4)
+```
