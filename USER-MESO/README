@@ -1,0 +1,11 @@
+This package provides acceleration of DPD simulation on nVIDIA GPUs
+ 
+See this section of the manual to get started:
+
+*
+
+There are example scripts for using this package in
+examples/USER/meso.
+
+The person who created this package is Yu-Hang Tang at Brown University (yuhang_tang at brown dot edu).
+Contact him directly if you have questions.
