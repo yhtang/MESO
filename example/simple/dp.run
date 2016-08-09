@@ -1,0 +1,28 @@
+# 32768 DPD Particles Benchmark
+# Usage: ./lmp -in run_file -var case {25|48|64}
+
+dimension       3
+units           lj
+#boundary        f f f
+
+atom_style      dpd/atomic/meso
+neighbor        0.3 bin
+neigh_modify    delay 0 every 5 check no
+
+read_data       ${case}.data
+
+run_style       mvv/meso
+pair_style      dpd/meso 1.0 419084618
+pair_coeff      1 1 15 4.5 3.0 1.0 1.0
+
+compute         mythermo all temp/meso
+
+velocity        all create 1.0 788662042 loop all
+fix             3 all nve/meso
+thermo_style    custom step temp cpu spcpu
+thermo          100
+thermo_modify   temp mythermo
+
+#dump		dump0 all atom 100 32768.lammpstrj
+timestep        0.005
+run             1000
