@@ -8,7 +8,7 @@ Tang, Yu-Hang, and George Em Karniadakis. "Accelerating dissipative particle dyn
 # Compilation Guide
 NVCC and a MPI implementation is required for compilation of the code.
 ```
-cd <working_copy>
+cd <working_copy>/src
 make yes-molecule
 make yes-user-meso
 make meso ARCH=[sm_30|sm_35|sm_52|sm_60|...]
