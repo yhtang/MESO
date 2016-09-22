@@ -36,7 +36,9 @@ case: simulation box size (number density = 4)
 
 # Example simulations
 
-<img src="arbi.jpg" width="100%">Amphiphilic polymers in microfluidic channel.</img>
+| Amphiphilic polymers in microfluidic channel |
+|:---------------------------------:|
+| <img src="arbi.jpg" width="1080px"/> |
 
 | Membrane wrapping into a vesicle     |  Multi-layer vesicle                   |
 |:------------------------------------:|:--------------------------------------:|
