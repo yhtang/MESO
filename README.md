@@ -40,4 +40,4 @@ case: simulation box size (number density = 4)
 
 | Membrane wrapping into a vesicle     |  Multi-layer vesicle                   |
 |:------------------------------------:|:--------------------------------------:|
-| <img src="vesi.jpg" height="500px"/> |  <img src="vesi2.jpg" height="500px"/> |
+| <img src="vesi.jpg" width="auto" height="500px"/> |  <img src="vesi2.jpg" width="auto" height="500px"/> |
