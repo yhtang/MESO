@@ -1,5 +1,15 @@
 # MESO
-The <sub><i>USER</i></sub>**MESO** package of LAMMPS is a fully GPU-accelerated package for Dissipative Particle Dynamics. Instead of being merely a translation of the conventional molecular dynamics, the package integrates several innovations that specifically targets CUDA devices: an atomics-free neighbor list construction algorithm and a locally transposed storage layout; a new seeding scheme for in-situ random number generators; fully overlapped computation/transfer; and specialized transcendental functions. It can achieve tens of times speedup on a single CUDA GPU over 8-16 CPU cores. The work is featured by a NVIDIA Parallel Forall blog article [Accelerating Dissipative Particle Dynamics Simulation on Tesla GPUs](https://devblogs.nvidia.com/parallelforall/accelerating-dissipative-particle-dynamics-simulation-tesla-gpus/).
+The <sub><i>USER</i></sub>**MESO** package of LAMMPS is a fully GPU-accelerated package for Dissipative Particle Dynamics. Instead of being merely a translation of the conventional molecular dynamics, the package integrates several innovations that specifically targets CUDA devices
+
+  * atomics-free warp-synchronous neighbor list construction algorithm;
+  * 2-level particle reordering which aligns with the cell list lattice boundaries for generating strictly monotonic neighbor list
+  * locally transposed neighbor list;
+  * redesigned non-branching transcendental functions (sin, cos, pow, log, exp, etc.);
+  * overlapped pairwise force evaluation and halo exchange using CUDA streams for hiding communication and kernel launch latency;
+  * radix sort with GPU stream support;
+  * pairwise random number generation based on per-timestep binary particle signatures and the Tiny Encryption Algorithm;
+
+It can achieve tens of times speedup on a single CUDA GPU over 8-16 CPU cores. The work is featured by a NVIDIA Parallel Forall blog article [Accelerating Dissipative Particle Dynamics Simulation on Tesla GPUs](https://devblogs.nvidia.com/parallelforall/accelerating-dissipative-particle-dynamics-simulation-tesla-gpus/).
 
 # License
 The package can be freely used and redistributed under the GPL v3 license. However we would greatly appreciate if you could cite the following paper:<br/>
@@ -23,3 +33,11 @@ sp.run: single-precision
 dp.run: double-precison
 case: simulation box size (number density = 4)
 ```
+
+# Example simulations
+
+<img src="arbi.jpg" width="100%">Amphiphilic polymers in microfluidic channel.</img>
+
+<img src="vesi.jpg" width="50%">Membrane wrapping into a vesicle.</img>
+
+<img src="vesi2.jpg" width="50%">Multi-layer vesicle.</img>
