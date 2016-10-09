@@ -183,9 +183,9 @@ void MesoPairDPDMini::compute_kernel( int eflag, int vflag, int p_beg, int p_end
         static GridConfig grid_cfg = meso_device->configure_kernel( gpu_dpd_mini<1>, 0 );
         gpu_dpd_mini<1> <<< grid_cfg.x, grid_cfg.y, 0, meso_device->stream() >>> (
             meso_atom->tex_coord_merged, meso_atom->tex_veloc_merged,
-            meso_atom->dev_force[0],   meso_atom->dev_force[1],   meso_atom->dev_force[2],
-            meso_atom->dev_virial[0], meso_atom->dev_virial[1], meso_atom->dev_virial[2],
-            meso_atom->dev_virial[3], meso_atom->dev_virial[4], meso_atom->dev_virial[5],
+            meso_atom->dev_force(0),   meso_atom->dev_force(1),   meso_atom->dev_force(2),
+            meso_atom->dev_virial(0), meso_atom->dev_virial(1), meso_atom->dev_virial(2),
+            meso_atom->dev_virial(3), meso_atom->dev_virial(4), meso_atom->dev_virial(5),
             dlist->dev_pair_count_core, dlist->dev_pair_table,
             meso_atom->dev_e_pair, a0, gamma, sigma * 1.0 / sqrt( update->dt ),
             dlist->n_col,
@@ -195,9 +195,9 @@ void MesoPairDPDMini::compute_kernel( int eflag, int vflag, int p_beg, int p_end
         static GridConfig grid_cfg = meso_device->configure_kernel( gpu_dpd_mini<0>, 0 );
         gpu_dpd_mini<0> <<< grid_cfg.x, grid_cfg.y, 0, meso_device->stream() >>> (
             meso_atom->tex_coord_merged, meso_atom->tex_veloc_merged,
-            meso_atom->dev_force[0],   meso_atom->dev_force[1],   meso_atom->dev_force[2],
-            meso_atom->dev_virial[0], meso_atom->dev_virial[1], meso_atom->dev_virial[2],
-            meso_atom->dev_virial[3], meso_atom->dev_virial[4], meso_atom->dev_virial[5],
+            meso_atom->dev_force(0),   meso_atom->dev_force(1),   meso_atom->dev_force(2),
+            meso_atom->dev_virial(0), meso_atom->dev_virial(1), meso_atom->dev_virial(2),
+            meso_atom->dev_virial(3), meso_atom->dev_virial(4), meso_atom->dev_virial(5),
             dlist->dev_pair_count_core, dlist->dev_pair_table,
             meso_atom->dev_e_pair, a0, gamma, sigma * 1.0 / sqrt( update->dt ),
             dlist->n_col,

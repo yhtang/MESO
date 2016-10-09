@@ -206,7 +206,7 @@ void MesoFixRDF::post_force(int evflag)
 		MesoNeighList *dlist = meso_neighbor->lists_device[ force->pair->list->index ];
 
         int n_cell       = meso_neighbor->mbins();
-        int shmem_size = dev_histogram.size() + ( grid_cfg.y / WARPSZ ) * ( nslot * nword * sizeof( int ) );
+        int shmem_size = dev_histogram.n_byte() + ( grid_cfg.y / WARPSZ ) * ( nslot * nword * sizeof( int ) );
 
          gpu_compute_rdf<nslot, nword> <<< grid_cfg.x, grid_cfg.y, shmem_size, meso_device->stream() >>> (
 			dev_histogram,
@@ -217,7 +217,7 @@ void MesoFixRDF::post_force(int evflag)
     		meso_neighbor->cuda_bin.dev_bin_size_local,
     		dlist->dev_stencil_len,
     		dlist->dev_stencil,
-    		dlist->dev_stencil.pitch(),
+    		dlist->dev_stencil.pitch_elem(),
     		rc,
     		n_hist/rc,
     		n_hist,
@@ -233,7 +233,7 @@ void MesoFixRDF::dump()
 {
     // dump result
 	std::vector<uint> histogram( n_hist );
-    dev_histogram.download( &histogram[0], dev_histogram.n(), meso_device->stream() );
+    dev_histogram.download( &histogram[0], dev_histogram.n_elem(), meso_device->stream() );
     meso_device->sync_device();
 
     long long n[2] = {0, 0};

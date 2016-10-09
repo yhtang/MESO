@@ -43,7 +43,7 @@ using namespace LAMMPS_NS;
 MesoFixRg::MesoFixRg( LAMMPS *lmp, int narg, char **arg ):
     Fix( lmp, narg, arg ),
     MesoPointers( lmp ),
-    dev_com( lmp, "MesoFixRg::dev_com" ),
+    dev_com( lmp, "MesoFixRg::dev_com", 3 ),
     dev_com_mass( lmp, "MesoFixRg::dev_com_n" ),
     dev_rg_sq( lmp, "MesoFixRg::dev_rg" ),
     dev_rg_sum( lmp, "MesoFixRg::dev_rg_mean" ),
@@ -245,32 +245,32 @@ void MesoFixRg::post_integrate()
     dev_rg_sq.set( 0.f, meso_device->stream() );
 
     gpu_fix_rg_com_reduce<<< grid_cfg1.x, grid_cfg1.y, 0, meso_device->stream() >>> (
-    	meso_atom->dev_coord[0], meso_atom->dev_coord[1], meso_atom->dev_coord[2],
+    	meso_atom->dev_coord(0), meso_atom->dev_coord(1), meso_atom->dev_coord(2),
     	meso_atom->dev_mass,
     	meso_atom->dev_image,
     	meso_atom->dev_mole,
-    	dev_com[0],
-    	dev_com[1],
-    	dev_com[2],
+    	dev_com(0),
+    	dev_com(1),
+    	dev_com(2),
     	domain->xprd, domain->yprd, domain->zprd,
     	atom->nlocal );
 
     gpu_fix_rg_com_mean<<< grid_cfg2.x, grid_cfg2.y, 0, meso_device->stream() >>> (
-    	dev_com[0],
-    	dev_com[1],
-    	dev_com[2],
+    	dev_com(0),
+    	dev_com(1),
+    	dev_com(2),
     	dev_com_mass,
     	n_mol );
 
     gpu_fix_rg_reduce<<< grid_cfg3.x, grid_cfg3.y, 0, meso_device->stream() >>> (
-    	meso_atom->dev_coord[0], meso_atom->dev_coord[1], meso_atom->dev_coord[2],
+    	meso_atom->dev_coord(0), meso_atom->dev_coord(1), meso_atom->dev_coord(2),
     	meso_atom->dev_mass,
     	meso_atom->dev_mask,
     	meso_atom->dev_image,
     	meso_atom->dev_mole,
-    	dev_com[0],
-    	dev_com[1],
-    	dev_com[2],
+    	dev_com(0),
+    	dev_com(1),
+    	dev_com(2),
     	dev_rg_sq,
     	domain->xprd, domain->yprd, domain->zprd,
 	target_group,
@@ -289,7 +289,7 @@ void MesoFixRg::dump()
 {
     // dump result
 	double rg_sum;
-	dev_rg_sum.download( &rg_sum, dev_rg_sum.n(), meso_device->stream() );
+	dev_rg_sum.download( &rg_sum, dev_rg_sum.n_elem(), meso_device->stream() );
 	dev_rg_sum.set( 0., meso_device->stream() );
     meso_device->sync_device();
 

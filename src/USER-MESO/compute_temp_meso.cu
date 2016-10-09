@@ -78,12 +78,12 @@ double MesoComputeTemp::compute_scalar()
 {
     invoked_scalar = update->ntimestep;
 
-    if( atom->nlocal > per_atom_eK.n() ) per_atom_eK.grow( atom->nlocal, false, false );
+    if( atom->nlocal > per_atom_eK.n_elem() ) per_atom_eK.grow( atom->nlocal, false, false );
     size_t threads_per_block = meso_device->query_block_size( gpu_eK_scalar );
     gpu_eK_scalar <<< n_block( atom->nlocal, threads_per_block ), threads_per_block, 0, meso_device->stream() >>> (
-        meso_atom->dev_veloc[0],
-        meso_atom->dev_veloc[1],
-        meso_atom->dev_veloc[2],
+        meso_atom->dev_veloc(0),
+        meso_atom->dev_veloc(1),
+        meso_atom->dev_veloc(2),
         meso_atom->dev_mass,
         meso_atom->dev_mask,
         per_atom_eK,

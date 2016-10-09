@@ -83,7 +83,7 @@ MesoFixBoundaryQcSpecial::MesoFixBoundaryQcSpecial( LAMMPS *lmp, int narg, char 
         }
     }
 
-    if( ( ox == 0. && oy == 0. && oz == 0. ) || radius < 1 || poly.n() == 0 || a0 == 0. )
+    if( ( ox == 0. && oy == 0. && oz == 0. ) || radius < 1 || poly.n_elem() == 0 || a0 == 0. )
         error->all( FLERR, "Usage: boundary/fc group [cut double] [T doublex2] [a0 double] [radius double] [length double] [center doublex3] [orient doublex3] [poly int doublex?]" );
 
     double n = std::sqrt( ox * ox + oy * oy + oz * oz );
@@ -176,11 +176,11 @@ void MesoFixBoundaryQcSpecial::post_force( int vflag )
     }
 
     gpu_fix_boundary_qc_special <<< grid_cfg.x, grid_cfg.y, 0, meso_device->stream() >>> (
-        meso_atom->dev_coord[0], meso_atom->dev_coord[1], meso_atom->dev_coord[2],
+        meso_atom->dev_coord(0), meso_atom->dev_coord(1), meso_atom->dev_coord(2),
         meso_atom->dev_T, meso_atom->dev_Q,
         meso_atom->dev_mask,
         groupbit,
-        poly.n() - 1,
+        poly.n_elem() - 1,
         poly,
         cx, cy, cz,
         ox, oy, oz,

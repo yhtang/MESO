@@ -137,14 +137,14 @@ double MesoComputeEcEDPD::compute_scalar()
 
     pair->prepare_coeff();
     meso_atom->meso_avec->dp2sp_merged( 0, 0, atom->nlocal+atom->nghost, true );
-    if (dev_energy.n() < atom->nlocal) {
+    if (dev_energy.n_elem() < atom->nlocal) {
     	dev_energy.grow( atom->nlocal );
     	dev_ninter.grow( atom->nlocal );
     }
     MesoNeighList *dlist = meso_neighbor->lists_device[ pair->list->index ];
 
-    static GridConfig grid_cfg = meso_device->configure_kernel( gpu_potential_ec_trp, pair->dev_coefficients.size() );
-    gpu_potential_ec_trp<<< grid_cfg.x, grid_cfg.y, pair->dev_coefficients.size(), meso_device->stream() >>> (
+    static GridConfig grid_cfg = meso_device->configure_kernel( gpu_potential_ec_trp, pair->dev_coefficients.n_byte() );
+    gpu_potential_ec_trp<<< grid_cfg.x, grid_cfg.y, pair->dev_coefficients.n_byte(), meso_device->stream() >>> (
 		meso_atom->tex_coord_merged,
 		meso_atom->tex_misc("therm"),
 		meso_atom->dev_mask,

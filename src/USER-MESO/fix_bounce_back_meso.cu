@@ -99,6 +99,7 @@ __global__ void gpu_fix_solid_wall_bounce(
                 }
             }
             if( z ) {
+            	//r64 z0 = coord_z[i];
                 if( coord_z[i] <= boxlo.z ) {
                     veloc_z[i] = fabs( veloc_z[i] );
                     coord_z[i] = 2. * boxlo.z - coord_z[i];
@@ -106,6 +107,9 @@ __global__ void gpu_fix_solid_wall_bounce(
                     veloc_z[i] = -fabs( veloc_z[i] );
                     coord_z[i] = 2. * boxhi.z - coord_z[i];
                 }
+                //if ( coord_z[i] <= boxlo.z || coord_z[i] >= boxhi.z ) {
+                //	printf("particle %d still out of box after bouncing back, z0 = %lf\n", z0);
+                //}
             }
         }
     }
@@ -123,8 +127,8 @@ void MesoFixBounceBack::bounce_back()
     double3 lo = make_double3( domain->boxlo[0], domain->boxlo[1], domain->boxlo[2] );
 
     gpu_fix_solid_wall_bounce <<< grid_cfg.x, grid_cfg.y, 0, meso_device->stream() >>> (
-        meso_atom->dev_coord[0], meso_atom->dev_coord[1], meso_atom->dev_coord[2],
-        meso_atom->dev_veloc[0], meso_atom->dev_veloc[1], meso_atom->dev_veloc[2],
+        meso_atom->dev_coord(0), meso_atom->dev_coord(1), meso_atom->dev_coord(2),
+        meso_atom->dev_veloc(0), meso_atom->dev_veloc(1), meso_atom->dev_veloc(2),
         meso_atom->dev_mask,
         hi, lo,
         x, y, z,

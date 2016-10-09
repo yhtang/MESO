@@ -140,7 +140,7 @@ void MesoNeighbor::bond_all()
             meso_atom->dev_nbond,
             meso_atom->dev_bond,
             meso_atom->dev_bond_mapped,
-            meso_atom->dev_bond_mapped.pitch(),
+            meso_atom->dev_bond_mapped.pitch_elem(),
             atom->nlocal );
     } else if( atom->map_style == 2 ) {
         size_t threads_per_block = meso_device->query_block_size( gpu_map_bond_hash );
@@ -153,7 +153,7 @@ void MesoNeighbor::bond_all()
             meso_atom->dev_bond_mapped,
             meso_atom->nonce,
             meso_atom->hash_table_size,
-            meso_atom->dev_bond_mapped.pitch(),
+            meso_atom->dev_bond_mapped.pitch_elem(),
             atom->nlocal );
     }
 }
@@ -218,7 +218,7 @@ void MesoNeighbor::angle_all()
             meso_atom->dev_nangle,
             meso_atom->dev_angle,
             meso_atom->dev_angle_mapped,
-            meso_atom->dev_angle_mapped.pitch(),
+            meso_atom->dev_angle_mapped.pitch_elem(),
             atom->nlocal );
     } else if( atom->map_style == 2 ) {
         size_t threads_per_block = meso_device->query_block_size( gpu_map_angle_hash<256> );
@@ -231,7 +231,7 @@ void MesoNeighbor::angle_all()
             meso_atom->dev_angle_mapped,
             meso_atom->nonce,
             meso_atom->hash_table_size,
-            meso_atom->dev_angle_mapped.pitch(),
+            meso_atom->dev_angle_mapped.pitch_elem(),
             atom->nlocal );
     }
 }
@@ -320,7 +320,7 @@ void MesoNeighbor::dihedral_all()
             meso_atom->dev_ndihed,
             meso_atom->dev_dihed,
             meso_atom->dev_dihed_mapped,
-            meso_atom->dev_dihed_mapped.pitch(),
+            meso_atom->dev_dihed_mapped.pitch_elem(),
             atom->nlocal );
     } else if( atom->map_style == 2 ) {
         size_t threads_per_block = meso_device->query_block_size( gpu_map_dihed_hash<256> );
@@ -333,7 +333,7 @@ void MesoNeighbor::dihedral_all()
             meso_atom->dev_dihed_mapped,
             meso_atom->nonce,
             meso_atom->hash_table_size,
-            meso_atom->dev_dihed_mapped.pitch(),
+            meso_atom->dev_dihed_mapped.pitch_elem(),
             atom->nlocal );
     }
 
@@ -343,7 +343,7 @@ void MesoNeighbor::dihedral_all()
         meso_atom->dev_ndihed,
         meso_atom->dev_dihed,
         meso_atom->dev_dihed_mapped,
-        meso_atom->dev_dihed_mapped.pitch(),
+        meso_atom->dev_dihed_mapped.pitch_elem(),
         atom->nlocal );
 }
 
@@ -575,9 +575,9 @@ void MesoNeighbor::binning_meso( MesoNeighList *list, bool ghost )
 
     int threads_per_block = meso_device->query_block_size( gpu_assign_bin_id );
     gpu_assign_bin_id <<< n_block( n_atom, threads_per_block ), threads_per_block, 0, meso_device->stream() >>> (
-    	meso_atom->dev_coord[0],
-        meso_atom->dev_coord[1],
-        meso_atom->dev_coord[2],
+    	meso_atom->dev_coord(0),
+        meso_atom->dev_coord(1),
+        meso_atom->dev_coord(2),
         cuda_bin.dev_bin_id,
         cuda_bin.dev_atm_id,
         my_box.lo, my_box.hi,
@@ -621,7 +621,7 @@ void MesoNeighbor::binning_meso( MesoNeighList *list, bool ghost )
         cuda_bin.dev_bin_size_local,
         n_bin );
 
-    *max_local_bin_size = 0;
+    max_local_bin_size[0] = 0;
     threads_per_block = 1024 ;
     gpu_reduce_max_host <<< 1, threads_per_block, 0, meso_device->stream() >>> (
         cuda_bin.dev_bin_size_local.ptr(),
@@ -669,8 +669,8 @@ void MesoNeighbor::binning_meso( MesoNeighList *list, bool ghost )
         list->dev_neighbor_bin,
         list->dev_stencil,
         list->dev_stencil_len,
-        list->dev_neighbor_bin.pitch(),
-        list->dev_stencil.pitch(),
+        list->dev_neighbor_bin.pitch_elem(),
+        list->dev_stencil.pitch_elem(),
         tuple_size,
         n_bin
     );
@@ -683,7 +683,7 @@ void MesoNeighbor::binning_meso( MesoNeighList *list, bool ghost )
         gpu_sentinel <<< grid_cfg.x, grid_cfg.y, 0, meso_device->stream() >>> (
             list->dev_stencil_len,
             cuda_bin.dev_bin_size_local,
-            list->dev_stencil.pitch(),
+            list->dev_stencil.pitch_elem(),
             n_bin
         );
     }
@@ -710,6 +710,9 @@ void MesoNeighbor::binning_meso( MesoNeighList *list, bool ghost )
 //  exit(0);
 }
 
+#if 0
+// POTENTIAL BUG IN CUDA RUNTIME?
+// NEW-DELETE PAIR DOES NOT RELEASE MEMORY
 __global__ void gpu_stencil_full_bin_3d(
     int *neighbor_count,
     int *neighbor_bin,
@@ -764,6 +767,62 @@ __global__ void gpu_stencil_full_bin_3d(
     neighbor_count[ Bid ] = nStencil;
     delete [] NeighBinMorton;
 }
+#endif
+
+__global__ void gpu_stencil_full_bin_3d(
+    int *neighbor_count,
+    int *neighbor_bin,
+    uint *stencil_key,
+    const int  mbinx,
+    const int  mbiny,
+    const int  mbinz,
+    const int  neighbor_range,
+    const int  neighbin_padding
+)
+{
+    int bid_x = blockIdx.x * blockDim.x + threadIdx.x;
+    int bid_y = blockIdx.y * blockDim.y + threadIdx.y;
+    int bid_z = blockIdx.z * blockDim.z + threadIdx.z;
+
+    if( bid_x >= mbinx || bid_y >= mbiny || bid_z >= mbinz ) return;
+
+    int  bid = calc_bid( bid_x, bid_y, bid_z, mbinx, mbiny );
+    int  stencil_sz = 0;
+    uint * key = stencil_key + bid * neighbin_padding;
+    neighbor_bin += bid * neighbin_padding ;
+
+    for( int k = -neighbor_range ; k <= neighbor_range ; k++ )
+        for( int j = -neighbor_range ; j <= neighbor_range ; j++ )
+            for( int i = -neighbor_range ; i <= neighbor_range ; i++ ) {
+                int bid_x_new = bid_x + i ;
+                int bid_y_new = bid_y + j ;
+                int bid_z_new = bid_z + k ;
+                if( bid_x_new < 0 || bid_x_new >= mbinx
+                        || bid_y_new < 0 || bid_y_new >= mbiny
+                        || bid_z_new < 0 || bid_z_new >= mbinz ) continue;
+                neighbor_bin   [ stencil_sz ] = calc_bid( bid_x_new, bid_y_new, bid_z_new, mbinx, mbiny ) ;
+                key[ stencil_sz ] = morton_encode( bid_x_new, bid_y_new, bid_z_new );
+                if( bid_x_new == 0 || bid_x_new == mbinx - 1
+                        || bid_y_new == 0 || bid_y_new == mbiny - 1
+                        || bid_z_new == 0 || bid_z_new == mbinz - 1 ) key[ stencil_sz ] += 0x80000000;
+                stencil_sz++;
+            }
+
+    // sort: bubble sort!
+    for( int i = 0 ; i < stencil_sz ; i++ )
+        for( int j = i + 1 ; j < stencil_sz ; j++ ) {
+            if( key[ i ] > key[ j ] ) {
+                int tmp1 = neighbor_bin[ i ];
+                neighbor_bin[ i ] = neighbor_bin[ j ];
+                neighbor_bin[ j ] = tmp1 ;
+                uint tmp2 = key[ i ];
+                key[ i ] = key[ j ];
+                key[ j ] = tmp2 ;
+            }
+        }
+
+    neighbor_count[ bid ] = stencil_sz;
+}
 
 void MesoNeighbor::stencil_full_bin_3d_meso( NeighList *list, int sx, int sy, int sz )
 {
@@ -780,32 +839,20 @@ void MesoNeighbor::stencil_full_bin_3d_meso( NeighList *list, int sx, int sy, in
     grid_size.y = n_block( mbiny, block_size.y );
     grid_size.z = n_block( mbinz, block_size.z );
 
+    DevicePitched<uint> dev_stencil_key( lmp, "MesoNeighbor::dev_stencil_key" );
+    dev_stencil_key.grow( dlist->dev_neighbor_bin.pitch_elem(), mbinx * mbiny * mbinz );
+
     gpu_stencil_full_bin_3d <<< grid_size, block_size, 0, meso_device->stream() >>> (
         dlist->dev_neighbor_count,
         dlist->dev_neighbor_bin,
+        dev_stencil_key,
         mbinx,
         mbiny,
         mbinz,
         neighbor_range,
-        dlist->dev_neighbor_bin.pitch()
+        dlist->dev_neighbor_bin.pitch_elem()
     );
 
-//  vector<int> stencil( list->neighbin_padding * list->nBinMax );
-//  vector<int> stencilcount( list->nBinMax );
-//  cudaMemcpyAsync( &stencil[0], list->devNeighborBin, stencil.size() * sizeof(int), cudaMemcpyDefault, cuda_engine->stream() );
-//  cudaMemcpyAsync( &stencilcount[0], list->devNeighborCount, stencilcount.size() * sizeof(int), cudaMemcpyDefault, cuda_engine->stream() );
-//  cuda_engine->stream().sync();
-//  for(int i=0;i<mbinx*mbiny*mbinz;i++)
-//  {
-//      cout<<"bin "<<i<<" has "<<stencilcount[i]<<" stencils."<<endl;
-//      for(int j=0;j<stencilcount[i];j++)
-//      {
-//          cout << stencil[ i * list->neighbin_padding + j ] <<',' << flush;
-//      }
-//      cout<<endl;
-//  }
-//  cudaDeviceReset();
-//  exit(0);
 }
 
 void MesoNeighbor::setup_bins()

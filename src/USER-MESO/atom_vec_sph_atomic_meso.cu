@@ -102,8 +102,8 @@ void AtomVecSPHAtomic::dp2sp_merged( int seed, int p_beg, int p_end, bool offset
     }
 
     gpu_merge_xvt_sph <<< grid_cfg.x, grid_cfg.y, 0, meso_device->stream() >>> (
-        meso_atom->dev_coord[0], meso_atom->dev_coord[1], meso_atom->dev_coord[2],
-        meso_atom->dev_veloc[0], meso_atom->dev_veloc[1], meso_atom->dev_veloc[2],
+        meso_atom->dev_coord(0), meso_atom->dev_coord(1), meso_atom->dev_coord(2),
+        meso_atom->dev_veloc(0), meso_atom->dev_veloc(1), meso_atom->dev_veloc(2),
         meso_atom->dev_mass, meso_atom->dev_type,
         meso_atom->dev_coord_merged, meso_atom->dev_veloc_merged,
         cx, cy, cz,

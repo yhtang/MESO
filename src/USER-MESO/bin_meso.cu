@@ -30,13 +30,13 @@ MesoBin::~MesoBin()
 
 void MesoBin::alloc_bins()
 {
-    if( atom->nlocal + atom->nghost > dev_bin_id.n() ) {
+    if( atom->nlocal + atom->nghost > dev_bin_id.n_elem() ) {
         int natom = ( atom->nlocal + atom->nghost ) * 1.1 ;
         dev_bin_id.grow( natom, false, false );
         dev_atm_id.grow( natom, false, false );
         tex_atm_id.bind( dev_atm_id );
     }
-    if( neighbor->mbinx * neighbor->mbiny * neighbor->mbinz + 1 > dev_bin_size.n() ) {
+    if( neighbor->mbinx * neighbor->mbiny * neighbor->mbinz + 1 > dev_bin_size.n_elem() ) {
         int nbin = neighbor->mbinx * neighbor->mbiny * neighbor->mbinz + 1 ;
         dev_bin_location  .grow( nbin, false, false );
         dev_bin_isghost   .grow( nbin, false, false );
@@ -45,7 +45,7 @@ void MesoBin::alloc_bins()
     }
 
 #ifdef LMP_MESO_LOG_L3
-    fprintf( stderr, "<MESO> Bin space allocated: per-atom %d per-bin %d\n", dev_bin_id.n(), dev_bin_size.n() );
+    fprintf( stderr, "<MESO> Bin space allocated: per-atom %d per-bin %d\n", dev_bin_id.n_elem(), dev_bin_size.n_elem() );
 #endif
 }
 

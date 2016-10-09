@@ -72,7 +72,7 @@ MesoFixBoundaryFc::MesoFixBoundaryFc( LAMMPS *lmp, int narg, char **arg ):
         }
     }
 
-    if( ( nx == 0. && ny == 0. && nz == 0. ) || poly.n() == 0 || poly == NULL )
+    if( ( nx == 0. && ny == 0. && nz == 0. ) || poly.n_elem() == 0 || poly == NULL )
         error->all( FLERR, "Usage: boundary/fc group [cut double] [H double]|[p doublex3] [n doublex3] [poly int doublex?]" );
 
     double n = std::sqrt( nx * nx + ny * ny + nz * nz );
@@ -152,11 +152,11 @@ void MesoFixBoundaryFc::post_force( int vflag )
     }
 
     gpu_fix_boundary_fc <<< grid_cfg.x, grid_cfg.y, 0, meso_device->stream() >>> (
-        meso_atom->dev_coord[0], meso_atom->dev_coord[1], meso_atom->dev_coord[2],
-        meso_atom->dev_force[0], meso_atom->dev_force[1], meso_atom->dev_force[2],
+        meso_atom->dev_coord(0), meso_atom->dev_coord(1), meso_atom->dev_coord(2),
+        meso_atom->dev_force(0), meso_atom->dev_force(1), meso_atom->dev_force(2),
         meso_atom->dev_mask,
         groupbit,
-        poly.n() - 1,
+        poly.n_elem() - 1,
         poly,
         nx, ny, nz,
         cut, H,

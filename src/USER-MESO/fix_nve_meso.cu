@@ -98,7 +98,7 @@ void FixNVEMeso::initial_integrate( __attribute__( ( unused ) ) int vflag )
 {
 //	printf("%s %d ",__FILE__,__LINE__);
 //	meso_device->sync_device();
-//	check_acc<<<1,1>>>( meso_atom->dev_force[0], meso_atom->dev_force[1], meso_atom->dev_force[2], atom->nlocal );
+//	check_acc<<<1,1>>>( meso_atom->dev_force(0), meso_atom->dev_force(1), meso_atom->dev_force(2), atom->nlocal );
 //	meso_device->sync_device();
 
     if( atom->T && atom->Q ) {  // EDPD
@@ -108,15 +108,15 @@ void FixNVEMeso::initial_integrate( __attribute__( ( unused ) ) int vflag )
             cudaFuncSetCacheConfig( gpu_fix_NVE_init_intgrate<1>, cudaFuncCachePreferL1 );
         }
         gpu_fix_NVE_init_intgrate<1> <<< grid_cfg.x, grid_cfg.y, 0, meso_device->stream() >>> (
-            meso_atom->dev_coord[0],
-            meso_atom->dev_coord[1],
-            meso_atom->dev_coord[2],
-            meso_atom->dev_veloc[0],
-            meso_atom->dev_veloc[1],
-            meso_atom->dev_veloc[2],
-            meso_atom->dev_force[0],
-            meso_atom->dev_force[1],
-            meso_atom->dev_force[2],
+            meso_atom->dev_coord(0),
+            meso_atom->dev_coord(1),
+            meso_atom->dev_coord(2),
+            meso_atom->dev_veloc(0),
+            meso_atom->dev_veloc(1),
+            meso_atom->dev_veloc(2),
+            meso_atom->dev_force(0),
+            meso_atom->dev_force(1),
+            meso_atom->dev_force(2),
             meso_atom->dev_T,
             meso_atom->dev_Q,
             meso_atom->dev_mask,
@@ -133,15 +133,15 @@ void FixNVEMeso::initial_integrate( __attribute__( ( unused ) ) int vflag )
             cudaFuncSetCacheConfig( gpu_fix_NVE_init_intgrate<0>, cudaFuncCachePreferL1 );
         }
         gpu_fix_NVE_init_intgrate<0> <<< grid_cfg.x, grid_cfg.y, 0, meso_device->stream() >>> (
-            meso_atom->dev_coord[0],
-            meso_atom->dev_coord[1],
-            meso_atom->dev_coord[2],
-            meso_atom->dev_veloc[0],
-            meso_atom->dev_veloc[1],
-            meso_atom->dev_veloc[2],
-            meso_atom->dev_force[0],
-            meso_atom->dev_force[1],
-            meso_atom->dev_force[2],
+            meso_atom->dev_coord(0),
+            meso_atom->dev_coord(1),
+            meso_atom->dev_coord(2),
+            meso_atom->dev_veloc(0),
+            meso_atom->dev_veloc(1),
+            meso_atom->dev_veloc(2),
+            meso_atom->dev_force(0),
+            meso_atom->dev_force(1),
+            meso_atom->dev_force(2),
             NULL,
             NULL,
             meso_atom->dev_mask,
@@ -185,12 +185,12 @@ void FixNVEMeso::final_integrate()
         cudaFuncSetCacheConfig( gpu_fix_NVE_final_integrate, cudaFuncCachePreferL1 );
     }
     gpu_fix_NVE_final_integrate <<< grid_cfg.x, grid_cfg.y, 0, meso_device->stream() >>> (
-        meso_atom->dev_veloc[0],
-        meso_atom->dev_veloc[1],
-        meso_atom->dev_veloc[2],
-        meso_atom->dev_force[0],
-        meso_atom->dev_force[1],
-        meso_atom->dev_force[2],
+        meso_atom->dev_veloc(0),
+        meso_atom->dev_veloc(1),
+        meso_atom->dev_veloc(2),
+        meso_atom->dev_force(0),
+        meso_atom->dev_force(1),
+        meso_atom->dev_force(2),
         meso_atom->dev_mask,
         meso_atom->dev_mass,
         dtf,

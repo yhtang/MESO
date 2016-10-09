@@ -301,7 +301,7 @@ CUDAEvent AtomVecDPDAngle::transfer_bond( TransferDirection direction, int* perm
                 dev_bond,
                 permute_from,
                 atom->bond_per_atom,
-                dev_bond.pitch(),
+                dev_bond.pitch_elem(),
                 p_beg,
                 n_transfer );
         e = meso_device->event( "AtomVecDPDBond::transfer_bond::C2G" );
@@ -316,7 +316,7 @@ CUDAEvent AtomVecDPDAngle::transfer_bond( TransferDirection direction, int* perm
             dev_bond,
             NULL,
             atom->bond_per_atom,
-            dev_bond.pitch(),
+            dev_bond.pitch_elem(),
             p_beg,
             n_transfer );
         dev_nbond_pinned.download( n_transfer, stream, p_beg );
@@ -353,7 +353,7 @@ void AtomVecDPDAngle::pack_angle( CUDAStream stream )
         nangle_prefix.push_back( n );
         n += atom->num_angle[i];
     }
-    if( dev_angle_id.n() < n ) {
+    if( dev_angle_id.n_elem() < n ) {
         meso_device->sync_device();
         hst_angle_id.grow( n );
         hst_angle_packed.grow( n );
@@ -368,7 +368,6 @@ void AtomVecDPDAngle::pack_angle( CUDAStream stream )
     size_t ntd = o.bet();
     double t1 = meso_device->get_time_omp();
 
-    if( OMPDEBUG ) printf( "%d %s\n", __LINE__, __FILE__ );
     #pragma omp parallel
     {
         int tid = omp_get_thread_num();
@@ -408,7 +407,7 @@ CUDAEvent AtomVecDPDAngle::transfer_angle( TransferDirection direction, int* per
                 dev_angle_packed,
                 dev_angle,
                 permute_to,
-                dev_angle.pitch(),
+                dev_angle.pitch_elem(),
                 dev_angle_packed.n() );
         e = meso_device->event( "AtomVecDPDAngle::angle::C2G" );
         e.record( stream );*/
@@ -431,7 +430,7 @@ CUDAEvent AtomVecDPDAngle::transfer_angle( TransferDirection direction, int* per
               dev_angle,
               meso_atom->dev_permute_from,
               atom->angle_per_atom,
-              dev_angle.pitch(),
+              dev_angle.pitch_elem(),
               p_beg,
               n_transfer );
       e = meso_device->event("AtomVecDPDAngle::angle::C2G");
@@ -442,14 +441,14 @@ CUDAEvent AtomVecDPDAngle::transfer_angle( TransferDirection direction, int* per
 //          char filename[256];
 //          sprintf( filename ,"dev_angle.v%d.%d", version, update->ntimestep );
 //          std::std::vector<int > n( dev_nangle.n() );
-//          std::std::vector<int4> v( dev_angle.pitch() * dev_angle.h() );
+//          std::std::vector<int4> v( dev_angle.pitch_elem() * dev_angle.h() );
 //          std::ofstream fout( filename );
 //          verify(( cudaMemcpy( n.data(), dev_nangle.ptr(), n.size() * sizeof(int ), cudaMemcpyDefault ) ));
 //          verify(( cudaMemcpy( v.data(), dev_angle.ptr(), v.size() * sizeof(int4), cudaMemcpyDefault ) ));
 //          for(int i = 0 ; i < atom->nlocal ; i++) {
 //              fout<<n[i]<<":\t";
 //              for(int j = 0 ; j < n[i] ; j++) {
-//                  fout<< v[ i+j*dev_angle.pitch() ] << '\t';
+//                  fout<< v[ i+j*dev_angle.pitch_elem() ] << '\t';
 //              }
 //              fout<<endl;
 //          }
@@ -469,7 +468,7 @@ CUDAEvent AtomVecDPDAngle::transfer_angle( TransferDirection direction, int* per
             dev_angle,
             NULL,
             atom->angle_per_atom,
-            dev_angle.pitch(),
+            dev_angle.pitch_elem(),
             p_beg,
             n_transfer );
         dev_nangle_pinned.download( n_transfer, stream, p_beg );

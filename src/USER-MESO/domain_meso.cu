@@ -50,7 +50,6 @@ void MesoDomain::pbc()
     size_t ntd = o.bet();
     double t1 = meso_device->get_time_omp();
 
-    if( OMPDEBUG ) printf( "%d %s\n", __LINE__, __FILE__ );
     #pragma omp parallel
     {
         int tid = omp_get_thread_num();

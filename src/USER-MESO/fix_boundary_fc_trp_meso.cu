@@ -87,7 +87,7 @@ MesoFixBoundaryFcTRP::MesoFixBoundaryFcTRP( LAMMPS *lmp, int narg, char **arg ):
         }
     }
 
-    if( ( nx == 0. && ny == 0. && nz == 0. ) || poly.n() == 0 || poly == NULL )
+    if( ( nx == 0. && ny == 0. && nz == 0. ) || poly.n_elem() == 0 || poly == NULL )
         error->all( FLERR, "Usage: boundary/fc group [type int] [T0 double] [cut double] [H double]|[p doublex3] [n doublex3] [poly int doublex?]" );
 
     double n = std::sqrt( nx * nx + ny * ny + nz * nz );
@@ -190,16 +190,16 @@ void MesoFixBoundaryFcTRP::post_force( int vflag )
     	T = input->variable->compute_equal(var);
     }
 
-    gpu_fix_boundary_fc_trp <<< grid_cfg.x, grid_cfg.y, pair->dev_coefficients.size(), meso_device->stream() >>> (
-        meso_atom->dev_coord[0], meso_atom->dev_coord[1], meso_atom->dev_coord[2],
-        meso_atom->dev_force[0], meso_atom->dev_force[1], meso_atom->dev_force[2],
+    gpu_fix_boundary_fc_trp <<< grid_cfg.x, grid_cfg.y, pair->dev_coefficients.n_byte(), meso_device->stream() >>> (
+        meso_atom->dev_coord(0), meso_atom->dev_coord(1), meso_atom->dev_coord(2),
+        meso_atom->dev_force(0), meso_atom->dev_force(1), meso_atom->dev_force(2),
         meso_atom->dev_T,
         meso_atom->dev_type, meso_atom->dev_mask,
         pair->dev_coefficients,
         atom->ntypes,
         wall_type,
         groupbit,
-        poly.n() - 1,
+        poly.n_elem() - 1,
         poly,
         T,
         nx, ny, nz,

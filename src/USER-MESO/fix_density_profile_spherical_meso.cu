@@ -131,7 +131,7 @@ void MesoFixDensitySpherical::dump( bigint tstamp ) {
 		sprintf( fn, "%s.%09d", filename.c_str(), tstamp );
 		fout.open( fn );
 
-		std::vector<r64> profile(dev_density_profile.n(), 0);
+		std::vector<r64> profile(dev_density_profile.n_elem(), 0);
 		dev_density_profile.download(profile.data(), profile.size());
 		for (int i = 0; i < profile.size(); i++) {
 			fout << i * dr - maxr << ( (i != profile.size() - 1) ? '\t' : '\n' );
@@ -328,9 +328,9 @@ void MesoFixDensitySpherical::post_integrate()
 
         dev_com.set( 0.f, meso_device->stream() );
         gpu_compute_com <<< grid_cfg1.x, grid_cfg1.y, 0, meso_device->stream() >>> (
-            meso_atom->dev_coord[0],
-            meso_atom->dev_coord[1],
-            meso_atom->dev_coord[2],
+            meso_atom->dev_coord(0),
+            meso_atom->dev_coord(1),
+            meso_atom->dev_coord(2),
             meso_atom->dev_mask,
             meso_atom->dev_mass,
             dev_com,
@@ -340,16 +340,16 @@ void MesoFixDensitySpherical::post_integrate()
         dev_polar_grid_size1.set( 0, meso_device->stream() );
         dev_polar_grid_size2.set( 0, meso_device->stream() );
         gpu_grid_spherical <<< grid_cfg2.x, grid_cfg2.y, 0, meso_device->stream() >>> (
-            meso_atom->dev_coord[0],
-            meso_atom->dev_coord[1],
-            meso_atom->dev_coord[2],
+            meso_atom->dev_coord(0),
+            meso_atom->dev_coord(1),
+            meso_atom->dev_coord(2),
             meso_atom->dev_mask,
             dev_com,
             dev_polar_grids1,
             dev_polar_grids2,
             dev_polar_grid_size1,
             dev_polar_grid_size2,
-            dev_polar_grids1.pitch(),
+            dev_polar_grids1.pitch_elem(),
             da,
             groupbit,
             n_grid_t,
@@ -358,30 +358,30 @@ void MesoFixDensitySpherical::post_integrate()
             atom->nlocal );
 
         gpu_measure_meanr <<< grid_cfg3.x, grid_cfg3.y, 0, meso_device->stream() >>> (
-            meso_atom->dev_coord[0],
-            meso_atom->dev_coord[1],
-            meso_atom->dev_coord[2],
+            meso_atom->dev_coord(0),
+            meso_atom->dev_coord(1),
+            meso_atom->dev_coord(2),
             dev_com,
             dev_polar_grids1,
             dev_polar_grid_size1,
             dev_polar_grid_meanr1,
-            dev_polar_grids1.pitch(),
+            dev_polar_grids1.pitch_elem(),
             n_grid );
         gpu_measure_meanr <<< grid_cfg3.x, grid_cfg3.y, 0, meso_device->stream() >>> (
-            meso_atom->dev_coord[0],
-            meso_atom->dev_coord[1],
-            meso_atom->dev_coord[2],
+            meso_atom->dev_coord(0),
+            meso_atom->dev_coord(1),
+            meso_atom->dev_coord(2),
             dev_com,
             dev_polar_grids2,
             dev_polar_grid_size2,
             dev_polar_grid_meanr2,
-            dev_polar_grids2.pitch(),
+            dev_polar_grids2.pitch_elem(),
             n_grid );
 
         gpu_density_profile <<< grid_cfg4.x, grid_cfg4.y, 0, meso_device->stream() >>> (
-            meso_atom->dev_coord[0],
-            meso_atom->dev_coord[1],
-            meso_atom->dev_coord[2],
+            meso_atom->dev_coord(0),
+            meso_atom->dev_coord(1),
+            meso_atom->dev_coord(2),
             meso_atom->dev_mask,
             dev_com,
             dev_polar_grid_size1,

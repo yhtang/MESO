@@ -160,7 +160,7 @@ void MesoFixRDFFast::post_force(int evflag)
 
 		MesoNeighList *dlist = meso_neighbor->lists_device[ force->pair->list->index ];
 
-		gpu_calc_rdf<<< grid_cfg.x, grid_cfg.y, dev_histogram.size(), meso_device->stream() >>> (
+		gpu_calc_rdf<<< grid_cfg.x, grid_cfg.y, dev_histogram.n_byte(), meso_device->stream() >>> (
 			meso_atom->tex_coord_merged,
 			meso_atom->dev_mask,
 			dlist->dev_pair_count_core,
@@ -182,7 +182,7 @@ void MesoFixRDFFast::dump()
 {
     // dump result
 	std::vector<uint> histogram( n_bin );
-    dev_histogram.download( &histogram[0], dev_histogram.n(), meso_device->stream() );
+    dev_histogram.download( &histogram[0], dev_histogram.n_elem(), meso_device->stream() );
     meso_device->sync_device();
 
     long long n[2] = {0, 0};

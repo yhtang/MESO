@@ -70,7 +70,7 @@ double MesoComputePE::compute_scalar()
         error->all( FLERR, "Energy was not tallied on needed timestep" );
 
     double one = 0.0;
-    memset( per_atom_energy, 0, per_atom_energy.size() );
+    memset( per_atom_energy, 0, per_atom_energy.n_byte() );
 
     if( pairflag && force->pair ) {
         size_t threads_per_block = 1024 ;

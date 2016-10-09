@@ -61,7 +61,7 @@ void FixEDPDVx2TMeso::setup_pre_neighbor()
 		cudaFuncSetCacheConfig( gpu_vx2T, cudaFuncCachePreferL1 );
 	}
 	gpu_vx2T<<< grid_cfg.x, grid_cfg.y, 0, meso_device->stream() >>> (
-		meso_atom->dev_veloc[0],
+		meso_atom->dev_veloc(0),
 		meso_atom->dev_T,
 		meso_atom->dev_mask,
 		groupbit,

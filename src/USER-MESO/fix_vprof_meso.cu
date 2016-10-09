@@ -177,14 +177,14 @@ void MesoFixVProf::compute()
 	if ( step - m >= -window && step - m < window )
 	{
 		r64 *dev_coord, *dev_velo;
-		if ( along == 0 ) dev_coord = meso_atom->dev_coord[0] ;
-		if ( along == 1 ) dev_coord = meso_atom->dev_coord[1] ;
-		if ( along == 2 ) dev_coord = meso_atom->dev_coord[2] ;
-		if ( component == 0 ) dev_velo = meso_atom->dev_veloc[0] ;
-		if ( component == 1 ) dev_velo = meso_atom->dev_veloc[1] ;
-		if ( component == 2 ) dev_velo = meso_atom->dev_veloc[2] ;
+		if ( along == 0 ) dev_coord = meso_atom->dev_coord(0);
+		if ( along == 1 ) dev_coord = meso_atom->dev_coord(1);
+		if ( along == 2 ) dev_coord = meso_atom->dev_coord(2);
+		if ( component == 0 ) dev_velo = meso_atom->dev_veloc(0);
+		if ( component == 1 ) dev_velo = meso_atom->dev_veloc(1);
+		if ( component == 2 ) dev_velo = meso_atom->dev_veloc(2);
 
-		gpu_velocity_profile_histogram<<< grid_cfg.x, grid_cfg.y, dev_histogram.size() + dev_count.size(), meso_device->stream() >>>(
+		gpu_velocity_profile_histogram<<< grid_cfg.x, grid_cfg.y, dev_histogram.n_byte() + dev_count.n_byte(), meso_device->stream() >>>(
 			dev_coord,
 			dev_velo,
 			dev_histogram,

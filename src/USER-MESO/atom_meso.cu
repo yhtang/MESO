@@ -73,12 +73,12 @@ void MesoAtom::create_avec( const char *style, int narg, char **arg, char *suffi
 
 __global__ void gpu_set_map(
     int* __restrict tag,
-    int* __restrict map_array,
+    uint* __restrict map_array,
     const int n
 )
 {
-    int i = blockIdx.x * blockDim.x + threadIdx.x;
-    if( i < n ) map_array[ tag[i] ] = i;
+    uint i = blockIdx.x * blockDim.x + threadIdx.x;
+    if( i < n ) atomicMin( map_array + tag[i], i );
 }
 
 __global__ void gpu_hash_map(
@@ -100,11 +100,8 @@ __global__ void gpu_hash_map(
             __TEA_core<8>( u, v );
             p = u % nslot;
             now = atomicCAS( hash_key + p, 0, t );
-        } while( now && now != t );
-        if( now == 0 ) {
-            hash_key[ p ] = t;
-            hash_val[ p ] = i;
-        }
+        } while ( now != 0 && now != t );
+		atomicMin( hash_val + p, i ); // favor local particle in case of multiple instances (local+ghost)
     }
 }
 
@@ -117,7 +114,7 @@ void MesoAtom::map_set_device()
             MPI_Allreduce( &max, &map_tag_max, 1, MPI_INT, MPI_MAX, world );
         }
 
-        if( dev_map_array.n() < map_tag_max + 1 )
+        if( dev_map_array.n_elem() < map_tag_max + 1 )
             dev_map_array.grow( map_tag_max + 1, false, false );
 
         dev_map_array.set( 0XFFFFFFFF, meso_device->stream() );
@@ -138,6 +135,7 @@ void MesoAtom::map_set_device()
         }
 
         dev_hash_key.set( 0, meso_device->stream() );
+        dev_hash_val.set( 0xFFFFFFFF, meso_device->stream() );
         int threads_per_block = meso_device->query_block_size( gpu_hash_map );
         gpu_hash_map <<< n_block( nall, threads_per_block ), threads_per_block, 0, meso_device->stream() >>> (
             dev_tag,
@@ -323,7 +321,6 @@ void MesoAtom::count_bulk_and_border( const std::vector<int> &borderness )
         size_t ntd = o.bet();
         double t1 = meso_device->get_time_omp();
 
-        if( OMPDEBUG ) printf( "%d %s\n", __LINE__, __FILE__ );
         #pragma omp parallel reduction(+:nb)
         {
             int tid = omp_get_thread_num();
@@ -368,7 +365,7 @@ void MesoAtom::sort_local()
 
     int threads_per_block = meso_device->query_block_size( gpu_build_reorder_keypair<1> );
     gpu_build_reorder_keypair<1> <<< n_block( atom->nlocal, threads_per_block ), threads_per_block, 0, meso_device->stream() >>> (
-        dev_coord[0], dev_coord[1], dev_coord[2],
+        dev_coord(0), dev_coord(1), dev_coord(2),
         dev_perm_key, dev_permute_from,
         hst_borderness,
         my_box_lo, my_box_hi,
@@ -378,7 +375,7 @@ void MesoAtom::sort_local()
         border_mask,
         atom->nlocal );
 
-	sorter.sort( dev_perm_key, dev_permute_from, atom->nlocal, l0_width + l1_width + l2_width, meso_device->stream() );
+	sorter.sort( *dev_perm_key, *dev_permute_from, atom->nlocal, l0_width + l1_width + l2_width, meso_device->stream() );
 
     threads_per_block = meso_device->query_block_size( gpu_permute_from2to );
     gpu_permute_from2to <<< n_block( atom->nlocal, threads_per_block ), threads_per_block, 0, meso_device->stream() >>> (

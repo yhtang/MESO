@@ -77,7 +77,7 @@ MesoFixBoundaryFcCylindrical::MesoFixBoundaryFcCylindrical( LAMMPS *lmp, int nar
         }
     }
 
-    if( ( ox == 0. && oy == 0. && oz == 0. ) || radius < 1 || poly.n() == 0 || poly == NULL )
+    if( ( ox == 0. && oy == 0. && oz == 0. ) || radius < 1 || poly.n_elem() == 0 || poly == NULL )
         error->all( FLERR, "Usage: boundary/fc group [type int] [T0 double] [cut double] [radius double] [length double] [center doublex3] [orient doublex3] [poly int doublex?]" );
 
     double n = std::sqrt( ox * ox + oy * oy + oz * oz );
@@ -166,11 +166,11 @@ void MesoFixBoundaryFcCylindrical::post_force( int vflag )
     }
 
     gpu_fix_boundary_fc_cylindrical <<< grid_cfg.x, grid_cfg.y, 0, meso_device->stream() >>> (
-        meso_atom->dev_coord[0], meso_atom->dev_coord[1], meso_atom->dev_coord[2],
-        meso_atom->dev_force[0], meso_atom->dev_force[1], meso_atom->dev_force[2],
+        meso_atom->dev_coord(0), meso_atom->dev_coord(1), meso_atom->dev_coord(2),
+        meso_atom->dev_force(0), meso_atom->dev_force(1), meso_atom->dev_force(2),
         meso_atom->dev_mask,
         groupbit,
-        poly.n() - 1,
+        poly.n_elem() - 1,
         poly,
         a0,
         cx, cy, cz,

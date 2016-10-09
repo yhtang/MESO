@@ -240,10 +240,10 @@ void MesoPairEDPDTRP::compute_kernel( int eflag, int vflag, int p_beg, int p_end
         static GridConfig grid_cfg = meso_device->configure_kernel( gpu_pnipam<1>, shared_mem_size );
         gpu_pnipam<1> <<< grid_cfg.x, grid_cfg.y, shared_mem_size, meso_device->stream() >>> (
             meso_atom->tex_coord_merged, meso_atom->tex_veloc_merged, meso_atom->tex_misc("therm"),
-            meso_atom->dev_force [0], meso_atom->dev_force [1], meso_atom->dev_force [2],
+            meso_atom->dev_force (0), meso_atom->dev_force (1), meso_atom->dev_force (2),
             meso_atom->dev_Q,
-            meso_atom->dev_virial[0], meso_atom->dev_virial[1], meso_atom->dev_virial[2],
-            meso_atom->dev_virial[3], meso_atom->dev_virial[4], meso_atom->dev_virial[5],
+            meso_atom->dev_virial(0), meso_atom->dev_virial(1), meso_atom->dev_virial(2),
+            meso_atom->dev_virial(3), meso_atom->dev_virial(4), meso_atom->dev_virial(5),
             dlist->dev_pair_count_core, dlist->dev_pair_table,
             meso_atom->dev_e_pair, dev_coefficients,
             1.0 / sqrt( update->dt ), dlist->n_col,
@@ -253,10 +253,10 @@ void MesoPairEDPDTRP::compute_kernel( int eflag, int vflag, int p_beg, int p_end
         static GridConfig grid_cfg = meso_device->configure_kernel( gpu_pnipam<0>, shared_mem_size );
         gpu_pnipam<0> <<< grid_cfg.x, grid_cfg.y, shared_mem_size, meso_device->stream() >>> (
             meso_atom->tex_coord_merged, meso_atom->tex_veloc_merged, meso_atom->tex_misc("therm"),
-            meso_atom->dev_force [0], meso_atom->dev_force [1], meso_atom->dev_force [2],
+            meso_atom->dev_force (0), meso_atom->dev_force (1), meso_atom->dev_force (2),
             meso_atom->dev_Q,
-            meso_atom->dev_virial[0], meso_atom->dev_virial[1], meso_atom->dev_virial[2],
-            meso_atom->dev_virial[3], meso_atom->dev_virial[4], meso_atom->dev_virial[5],
+            meso_atom->dev_virial(0), meso_atom->dev_virial(1), meso_atom->dev_virial(2),
+            meso_atom->dev_virial(3), meso_atom->dev_virial(4), meso_atom->dev_virial(5),
             dlist->dev_pair_count_core, dlist->dev_pair_table,
             meso_atom->dev_e_pair, dev_coefficients,
             1.0 / sqrt( update->dt ), dlist->n_col,

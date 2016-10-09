@@ -179,8 +179,8 @@ void AtomVecEDPDAtomic::dp2sp_merged( int seed, int p_beg, int p_end, bool offse
     }
 
     gpu_merge_xvtT <<< grid_cfg.x, grid_cfg.y, 0, meso_device->stream() >>> (
-        dev_coord[0], dev_coord[1], dev_coord[2],
-        dev_veloc[0], dev_veloc[1], dev_veloc[2],
+        dev_coord(0), dev_coord(1), dev_coord(2),
+        dev_veloc(0), dev_veloc(1), dev_veloc(2),
         dev_type,
         dev_tag,
         dev_mass,

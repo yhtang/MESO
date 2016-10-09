@@ -177,7 +177,7 @@ CUDAEvent AtomVecDPDBond::transfer_bond( TransferDirection direction, int* permu
                 dev_bond,
                 permute_from,
                 atom->bond_per_atom,
-                dev_bond.pitch(),
+                dev_bond.pitch_elem(),
                 p_beg,
                 n_transfer );
         e = meso_device->event( "AtomVecDPDBond::transfer_bond::C2G" );
@@ -192,7 +192,7 @@ CUDAEvent AtomVecDPDBond::transfer_bond( TransferDirection direction, int* permu
             dev_bond,
             NULL,
             atom->bond_per_atom,
-            dev_bond.pitch(),
+            dev_bond.pitch_elem(),
             p_beg,
             n_transfer );
         dev_nbond_pinned.download( n_transfer, stream, p_beg );

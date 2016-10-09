@@ -202,7 +202,7 @@ void MesoPairSPH::compute_kernel( int eflag, int vflag, int p_beg, int p_end )
     static GridConfig grid_cfg = meso_device->configure_kernel( gpu_sph, shared_mem_size );
     gpu_sph <<< grid_cfg.x, grid_cfg.y, shared_mem_size, meso_device->stream() >>> (
         meso_atom->tex_coord_merged, meso_atom->tex_veloc_merged, meso_atom->tex_rho,
-        meso_atom->dev_force[0],   meso_atom->dev_force[1],   meso_atom->dev_force[2],
+        meso_atom->dev_force(0),   meso_atom->dev_force(1),   meso_atom->dev_force(2),
         dlist->dev_pair_count_core, dlist->dev_pair_table,
         dev_coeffs1, dev_coeffs2,
         dlist->n_col, atom->ntypes,

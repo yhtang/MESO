@@ -148,7 +148,7 @@ void FixEggForce::post_force(int evflag)
 		meso_atom->tex_veloc_merged,
 		meso_atom->tex_misc("mask"),
 		meso_atom->tex_tag,
-		meso_atom->dev_force[0], meso_atom->dev_force[1], meso_atom->dev_force[2],
+		meso_atom->dev_force(0), meso_atom->dev_force(1), meso_atom->dev_force(2),
         list->dev_pair_count_core,
         list->dev_pair_table,
         rho0,

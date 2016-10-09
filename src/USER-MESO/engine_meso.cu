@@ -120,19 +120,25 @@ int MesoDevice::destroy()
 
 
 // show memory usage
-void MesoDevice::print_memory_usage( std::ostream &out )
+void MesoDevice::print_memory_usage( std::ostream &out, bool summary )
 {
     // consolidate usage for each tag
     std::map<std::string, int> usage;
+    std::size_t total_usage = 0;
     for( MemIter p = mem_table.begin(); p != mem_table.end(); p++ ) {
         if( usage.find( p->second.tag ) == usage.end() )
             usage[ p->second.tag ]  = p->second.size;
         else
             usage[ p->second.tag ] += p->second.size;
+        total_usage += p->second.size;
     }
     out << "----------------GPU MEMORY USAGE SUMMARY BEGIN----------------" << std::endl;
-    for( std::map<std::string, int>::iterator p = usage.begin(); p != usage.end(); p++ ) {
-        out << p->first << '\t' << p->second << std::endl;
+    if ( summary ) {
+    	printf("Total usage: %s\n", size2text( total_usage ).c_str() );
+    } else {
+		for( std::map<std::string, int>::iterator p = usage.begin(); p != usage.end(); p++ ) {
+			out << p->first << '\t' << p->second << std::endl;
+		}
     }
     out << "---------------- GPU MEMORY USAGE SUMMARY END ----------------" << std::endl;
 }

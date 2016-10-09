@@ -131,8 +131,8 @@ void MesoFixWall::boundary_force()
     double3 lo = make_double3( domain->boxlo[0], domain->boxlo[1], domain->boxlo[2] );
 
     gpu_fix_wall_force <<< grid_cfg.x, grid_cfg.y, 0, meso_device->stream() >>> (
-        meso_atom->dev_coord[0], meso_atom->dev_coord[1], meso_atom->dev_coord[2],
-        meso_atom->dev_force[0], meso_atom->dev_force[1], meso_atom->dev_force[2],
+        meso_atom->dev_coord(0), meso_atom->dev_coord(1), meso_atom->dev_coord(2),
+        meso_atom->dev_force(0), meso_atom->dev_force(1), meso_atom->dev_force(2),
         meso_atom->dev_mask,
         d,
         1.0 / d,
@@ -207,8 +207,8 @@ void MesoFixWall::bounce_back()
 
     gpu_fix_wall_bounce <<< grid_cfg.x, grid_cfg.y, 0, meso_device->stream() >>> (
         meso_atom->dev_tag,
-        meso_atom->dev_coord[0], meso_atom->dev_coord[1], meso_atom->dev_coord[2],
-        meso_atom->dev_veloc[0], meso_atom->dev_veloc[1], meso_atom->dev_veloc[2],
+        meso_atom->dev_coord(0), meso_atom->dev_coord(1), meso_atom->dev_coord(2),
+        meso_atom->dev_veloc(0), meso_atom->dev_veloc(1), meso_atom->dev_veloc(2),
         meso_atom->dev_mask,
         hi, lo,
         x, y, z,

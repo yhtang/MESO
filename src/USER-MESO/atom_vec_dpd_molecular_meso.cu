@@ -20,6 +20,8 @@ void AtomVecDPDMolecular::grow_device( int nmax_new )
     MesoAtomVec::grow_device( nmax_new );
 
     meso_atom->dev_mole = dev_mole.grow( nmax_new );
+
+    grow_exclusion();
 }
 
 // to capture the change of maxspecial
@@ -41,7 +43,6 @@ void AtomVecDPDMolecular::pin_host_array()
     MesoAtomVec::pin_host_array();
 
     dev_mole_pinned   .map_host( meso_atom->nmax, meso_atom->molecule );
-    dev_special_pinned.map_host( meso_atom->nmax * meso_atom->maxspecial, &( meso_atom->special[0][0] ) );
 }
 
 void AtomVecDPDMolecular::unpin_host_array()
@@ -49,7 +50,6 @@ void AtomVecDPDMolecular::unpin_host_array()
     MesoAtomVec::unpin_host_array();
 
     dev_mole_pinned   .unmap_host( meso_atom->molecule );
-    dev_special_pinned.unmap_host( meso_atom->special ? &meso_atom->special[0][0] : NULL );
 }
 
 // DIR = 0 : CPU -> GPU

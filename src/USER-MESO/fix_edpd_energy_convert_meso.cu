@@ -148,11 +148,11 @@ void FixEDPDEnergyConvert::initial_integrate(int evflag)
     meso_device->stream().waiton( events.back() );
 
     dev_dE.set( 0., meso_device->stream() );
-    if (dev_Q_in.n()<(*meso_atom->dev_Q).n()) dev_Q_in.grow( (*meso_atom->dev_Q).n() );
-    dev_Q_in.upload( meso_atom->dev_Q, (*meso_atom->dev_Q).n(), meso_device->stream() );
+    if (dev_Q_in.n_elem()<(*meso_atom->dev_Q).n_elem()) dev_Q_in.grow( (*meso_atom->dev_Q).n_elem() );
+    dev_Q_in.upload( meso_atom->dev_Q, (*meso_atom->dev_Q).n_elem(), meso_device->stream() );
 
-    static GridConfig grid_cfg = meso_device->configure_kernel( gpu_convert_energy, pair->dev_coefficients.size() );
-    gpu_convert_energy<<< grid_cfg.x, grid_cfg.y, pair->dev_coefficients.size(), meso_device->stream() >>> (
+    static GridConfig grid_cfg = meso_device->configure_kernel( gpu_convert_energy, pair->dev_coefficients.n_byte() );
+    gpu_convert_energy<<< grid_cfg.x, grid_cfg.y, pair->dev_coefficients.n_byte(), meso_device->stream() >>> (
 		meso_atom->tex_coord_merged,
 		meso_atom->tex_misc("therm"),
 		dev_Q_in,

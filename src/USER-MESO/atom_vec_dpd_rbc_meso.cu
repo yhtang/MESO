@@ -359,7 +359,7 @@ CUDAEvent AtomVecDPDRBC::transfer_bond( TransferDirection direction, int* permut
                 dev_bond_r0,
                 permute_from,
                 atom->bond_per_atom,
-                dev_bond.pitch(),
+                dev_bond.pitch_elem(),
                 p_beg,
                 n_transfer );
         e = meso_device->event( "AtomVecDPDBond::transfer_bond::C2G" );
@@ -376,7 +376,7 @@ CUDAEvent AtomVecDPDRBC::transfer_bond( TransferDirection direction, int* permut
             dev_bond_r0,
             NULL,
             atom->bond_per_atom,
-            dev_bond.pitch(),
+            dev_bond.pitch_elem(),
             p_beg,
             n_transfer );
         dev_nbond_pinned.download( n_transfer, stream, p_beg );
@@ -413,8 +413,8 @@ CUDAEvent AtomVecDPDRBC::transfer_angle( TransferDirection direction, int* permu
               dev_angle_a0,
               meso_atom->dev_permute_from,
               atom->angle_per_atom,
-              dev_angle.pitch(),
-              dev_angle_a0.pitch(),
+              dev_angle.pitch_elem(),
+              dev_angle_a0.pitch_elem(),
               p_beg,
               n_transfer );
       e = meso_device->event("AtomVecDPDRBC::angle::C2G");
@@ -433,8 +433,8 @@ CUDAEvent AtomVecDPDRBC::transfer_angle( TransferDirection direction, int* permu
             dev_angle_a0,
             NULL,
             atom->angle_per_atom,
-            dev_angle.pitch(),
-            dev_angle_a0.pitch(),
+            dev_angle.pitch_elem(),
+            dev_angle_a0.pitch_elem(),
             p_beg,
             n_transfer );
         dev_nangle_pinned.download( n_transfer, stream, p_beg );
@@ -473,8 +473,8 @@ CUDAEvent AtomVecDPDRBC::transfer_dihed( TransferDirection direction, int* permu
               dev_dihed,
               meso_atom->dev_permute_from,
               atom->dihedral_per_atom,
-              dev_dihed.pitch(),
-              dev_dihed_type.pitch(),
+              dev_dihed.pitch_elem(),
+              dev_dihed_type.pitch_elem(),
               p_beg,
               n_transfer );
       e = meso_device->event("AtomVecDPDRBC::dihed::C2G");
@@ -493,8 +493,8 @@ CUDAEvent AtomVecDPDRBC::transfer_dihed( TransferDirection direction, int* permu
             dev_dihed,
             NULL,
             atom->dihedral_per_atom,
-            dev_dihed.pitch(),
-            dev_dihed_type.pitch(),
+            dev_dihed.pitch_elem(),
+            dev_dihed_type.pitch_elem(),
             p_beg,
             n_transfer );
         dev_ndihed_pinned.download( n_transfer, stream, p_beg );

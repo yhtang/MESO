@@ -98,9 +98,9 @@ void MesoFixAddForce::post_force( int vflag )
     }
 
     gpu_fix_add_force <<< grid_cfg.x, grid_cfg.y, 0, meso_device->stream() >>> (
-		meso_atom->dev_force[0],
-		meso_atom->dev_force[1],
-		meso_atom->dev_force[2],
+		meso_atom->dev_force(0),
+		meso_atom->dev_force(1),
+		meso_atom->dev_force(2),
         meso_atom->dev_mask,
         fx, fy, fz,
         groupbit,

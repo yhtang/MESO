@@ -90,7 +90,7 @@ MesoFixBoundaryFcTRPSpecial::MesoFixBoundaryFcTRPSpecial( LAMMPS *lmp, int narg,
         }
     }
 
-    if( ( ox == 0. && oy == 0. && oz == 0. ) || radius < 1 || poly.n() == 0 || poly == NULL )
+    if( ( ox == 0. && oy == 0. && oz == 0. ) || radius < 1 || poly.n_elem() == 0 || poly == NULL )
         error->all( FLERR, "Usage: boundary/fc group [type int] [T0 double] [cut double] [radius double] [length double] [center doublex3] [orient doublex3] [poly int doublex?]" );
 
     double n = std::sqrt( ox * ox + oy * oy + oz * oz );
@@ -196,16 +196,16 @@ void MesoFixBoundaryFcTRPSpecial::post_force( int vflag )
 
     prepare_coeff();
 
-    gpu_fix_boundary_fc_trp_special <<< grid_cfg.x, grid_cfg.y, pair->dev_coefficients.size(), meso_device->stream() >>> (
-        meso_atom->dev_coord[0], meso_atom->dev_coord[1], meso_atom->dev_coord[2],
-        meso_atom->dev_force[0], meso_atom->dev_force[1], meso_atom->dev_force[2],
+    gpu_fix_boundary_fc_trp_special <<< grid_cfg.x, grid_cfg.y, pair->dev_coefficients.n_byte(), meso_device->stream() >>> (
+        meso_atom->dev_coord(0), meso_atom->dev_coord(1), meso_atom->dev_coord(2),
+        meso_atom->dev_force(0), meso_atom->dev_force(1), meso_atom->dev_force(2),
         meso_atom->dev_T,
         meso_atom->dev_type, meso_atom->dev_mask,
         pair->dev_coefficients,
         atom->ntypes,
         wall_type,
         groupbit,
-        poly.n() - 1,
+        poly.n_elem() - 1,
         poly,
         T_H, T_C,
         cx, cy, cz,

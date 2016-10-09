@@ -51,10 +51,10 @@ MesoFixPoiseuille::MesoFixPoiseuille( LAMMPS *lmp, int narg, char **arg ):
     if ( std::isdigit(arg[4][0]) ) dim_force = atoi( arg[4] );
     else dim_force = parser[ arg[4][0] ];
     strength  = atof( arg[5] );
-    if( narg >= 6 )
+    if( narg > 6 )
         bisect_frac = atof( arg[6] );
     else
-        bisect_frac = 0.;
+        bisect_frac = 0.5;
 }
 
 int MesoFixPoiseuille::setmask()
@@ -112,8 +112,8 @@ void MesoFixPoiseuille::post_force( int vflag )
 
     r64 bisect_point = bisect_frac * domain->boxhi[dim_ortho] + ( 1.0 - bisect_frac ) * domain->boxlo[dim_ortho];
     gpu_fix_pois_post_force <<< grid_cfg.x, grid_cfg.y, ( grid_cfg.y / WARPSZ ) * 2 * sizeof( r64 ), meso_device->stream() >>> (
-        meso_atom->dev_coord[dim_ortho],
-        meso_atom->dev_force[dim_force],
+        meso_atom->dev_coord(dim_ortho),
+        meso_atom->dev_force(dim_force),
         meso_atom->dev_mask,
         strength,
         bisect_point,

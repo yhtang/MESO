@@ -30,10 +30,10 @@ protected:
 	int n_mol;
 	int n_smoothing, c_smoothing;
 	double last_scalar;
-	DeviceVector<r32,3>  dev_com;
-	DeviceScalar<r32>    dev_com_mass;
-	DeviceScalar<r32>    dev_rg_sq;
-	DeviceScalar<r64>    dev_rg_sum;
+	DeviceVector<r32> dev_com;
+	DeviceScalar<r32> dev_com_mass;
+	DeviceScalar<r32> dev_rg_sq;
+	DeviceScalar<r64> dev_rg_sum;
 	virtual void dump();
 };
 

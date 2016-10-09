@@ -131,8 +131,8 @@ void MesoFixBounceBackSpecial::bounce_back()
     }
 
     gpu_fix_solid_wall_bounce_special <<< grid_cfg.x, grid_cfg.y, 0, meso_device->stream() >>> (
-		meso_atom->dev_coord[0], meso_atom->dev_coord[1], meso_atom->dev_coord[2],
-		meso_atom->dev_veloc[0], meso_atom->dev_veloc[1], meso_atom->dev_veloc[2],
+		meso_atom->dev_coord(0), meso_atom->dev_coord(1), meso_atom->dev_coord(2),
+		meso_atom->dev_veloc(0), meso_atom->dev_veloc(1), meso_atom->dev_veloc(2),
         meso_atom->dev_mask,
         cx, cy, cz,
         ox, oy, oz,

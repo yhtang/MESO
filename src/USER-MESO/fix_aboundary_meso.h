@@ -19,12 +19,11 @@ public:
 
 	virtual int setmask();
 	virtual void post_force(int);
+	virtual void end_of_step();
 
 protected:
 	int wall_group, wall_groupbit;
 	double rho0, rc, sigma;
-
-	double find_rho0();
 };
 
 }

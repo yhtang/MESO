@@ -69,7 +69,7 @@ __global__ void gpu_bond_harmonic(
     r64 *k  = &shared_data[0];
     r64 *r0 = &shared_data[n_type + 1];
     for( int i = threadIdx.x ; i < n_type + 1 ; i += blockDim.x ) {
-        k[i]  = k_global [i];
+        k [i]  = k_global [i];
         r0[i] = r0_global[i];
     }
     __syncthreads();
@@ -142,43 +142,43 @@ void MesoBondHarmonic::compute( int eflag, int vflag )
     if( eflag || vflag ) {
         gpu_bond_harmonic<1> <<< grid_cfg_EV.x, grid_cfg_EV.y, ( atom->nbondtypes + 1 ) * 2 * sizeof( r64 ), meso_device->stream() >>> (
             meso_atom->tex_coord_merged,
-            meso_atom->dev_force[0],
-            meso_atom->dev_force[1],
-            meso_atom->dev_force[2],
-            meso_atom->dev_virial[0],
-            meso_atom->dev_virial[1],
-            meso_atom->dev_virial[2],
-            meso_atom->dev_virial[3],
-            meso_atom->dev_virial[4],
-            meso_atom->dev_virial[5],
+            meso_atom->dev_force(0),
+            meso_atom->dev_force(1),
+            meso_atom->dev_force(2),
+            meso_atom->dev_virial(0),
+            meso_atom->dev_virial(1),
+            meso_atom->dev_virial(2),
+            meso_atom->dev_virial(3),
+            meso_atom->dev_virial(4),
+            meso_atom->dev_virial(5),
             meso_atom->dev_e_bond,
             meso_atom->dev_nbond,
             meso_atom->dev_bond_mapped,
             dev_k,
             dev_r0,
             period,
-            meso_atom->dev_bond_mapped.pitch(),
+            meso_atom->dev_bond_mapped.pitch_elem(),
             atom->nbondtypes,
             atom->nlocal );
     } else {
         gpu_bond_harmonic<0> <<< grid_cfg.x, grid_cfg.y, ( atom->nbondtypes + 1 ) * 2 * sizeof( r64 ), meso_device->stream() >>> (
             meso_atom->tex_coord_merged,
-            meso_atom->dev_force[0],
-            meso_atom->dev_force[1],
-            meso_atom->dev_force[2],
-            meso_atom->dev_virial[0],
-            meso_atom->dev_virial[1],
-            meso_atom->dev_virial[2],
-            meso_atom->dev_virial[3],
-            meso_atom->dev_virial[4],
-            meso_atom->dev_virial[5],
+            meso_atom->dev_force(0),
+            meso_atom->dev_force(1),
+            meso_atom->dev_force(2),
+            meso_atom->dev_virial(0),
+            meso_atom->dev_virial(1),
+            meso_atom->dev_virial(2),
+            meso_atom->dev_virial(3),
+            meso_atom->dev_virial(4),
+            meso_atom->dev_virial(5),
             meso_atom->dev_e_bond,
             meso_atom->dev_nbond,
             meso_atom->dev_bond_mapped,
             dev_k,
             dev_r0,
             period,
-            meso_atom->dev_bond_mapped.pitch(),
+            meso_atom->dev_bond_mapped.pitch_elem(),
             atom->nbondtypes,
             atom->nlocal );
     }

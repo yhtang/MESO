@@ -140,14 +140,14 @@ protected:
     DeviceScalar<int>    dev_type;
     DeviceScalar<int>    dev_mask;
     DeviceScalar<r64>    dev_mass;
-    DeviceVector<r64, 3>  dev_coord;
-    DeviceVector<r64, 3>  dev_force;
-    DeviceVector<r64, 3>  dev_veloc;
-    DeviceVector<r64, 6>  dev_virial;
+    DeviceVector<r64>    dev_coord;
+    DeviceVector<r64>    dev_force;
+    DeviceVector<r64>    dev_veloc;
+    DeviceVector<r64>    dev_virial;
     DeviceScalar<tagint> dev_image;
     DeviceScalar<r64>    dev_e_pair;
-    DeviceVector<r32, 3>  dev_r_coord;
-    DeviceVector<r32, 3>  dev_r_veloc;
+    DeviceVector<r32>    dev_r_coord;
+    DeviceVector<r32>    dev_r_veloc;
     DeviceScalar<float4> dev_coord_merged;
     DeviceScalar<float4> dev_veloc_merged;
     HostScalar<int>      hst_borderness;
@@ -194,7 +194,7 @@ protected:
         return e;
     }
     template<int NLANE, typename TYPE, int BLOCKSIZE>
-    CUDAEvent transfer_vector( Pinned<TYPE> &pinned, DeviceVector<TYPE, NLANE> &array, TransferDirection direction,
+    CUDAEvent transfer_vector( Pinned<TYPE> &pinned, DeviceVector<TYPE> &array, TransferDirection direction,
                                int* permute_to, int p_beg, int n_atom, CUDAStream stream, int action, bool streamed = true )
     {
         CUDAEvent e;
@@ -224,7 +224,7 @@ protected:
     }
     // for device vectors with dynamical dimension, no interleaving performed
     template<typename TYPE>
-    CUDAEvent transfer_vector( Pinned<TYPE> &pinned, DeviceVector<TYPE,_DYNAMIC_> &array, TransferDirection direction,
+    CUDAEvent transfer_vector( Pinned<TYPE> &pinned, DeviceVector<TYPE> &array, TransferDirection direction,
                                int* permute_to, int p_beg, int n_atom, CUDAStream stream, int action, bool streamed = true )
     {
         CUDAEvent e;

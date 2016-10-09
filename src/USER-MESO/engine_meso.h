@@ -63,7 +63,7 @@ public:
     void   configure_profiler( int, int );
     void   profiler_start();
     void   profiler_stop();
-    void   print_memory_usage( std::ostream &out );
+    void   print_memory_usage( std::ostream &out, bool summary = false );
     void   print_tuner_stat( std::ostream &out );
     std::size_t query_mem_size( void *ptr );
     std::size_t query_mem_pitch( void *ptr );
@@ -223,7 +223,10 @@ public:
             fprintf( stderr, "<MESO> Host memory cannot be re-allocated to Device memory %p\n", ptr );
             cudaDeviceReset();
             exit( 0 );
-        } else if( p->second.pitch == width * sizeof( TYPE ) && p->second.height == height ) return;
+        } else if( p->second.pitch == width * sizeof( TYPE ) && p->second.height == height ) {
+        	pitch = p->second.pitch;
+        	return;
+        }
 
         if( copy ) {
             TYPE* ptr_new = malloc_device_pitch<TYPE>( tag, pitch, width, height );
